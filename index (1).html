@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MOSAIC Check-In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: calm, coach-like, professional — a PD check-in, not a test
+   IDEA: a lake-survey field card: numbered stations, tallies, a signed receipt at the end
+   PICTURE: the activities themselves; a progress strip like depth soundings
+   COLOUR and TYPE: Lake Superior blue ground, white cards, signal orange accent; Inter Tight + Inter
+   LAYOUT: one calm column (fits a Canvas iframe), stations stacked, receipt last */
+:root{color-scheme:light dark;
+ --bg:light-dark(#eef3f7,#0c1620);--card:light-dark(#ffffff,#14222f);--ink:light-dark(#10202e,#e7eef4);
+ --muted:light-dark(#526474,#9fb1c1);--lake:light-dark(#0f4c75,#5fa8d8);--lake2:light-dark(#d9e8f3,#1b3347);
+ --acc:#e8661c;--ok:light-dark(#1d7a46,#5cd08e);--okbg:light-dark(#e3f4ea,#17321f);--no:light-dark(#b3261e,#ff8a80);--nobg:light-dark(#fbe7e5,#3a1c1a);--line:light-dark(#cfdbe5,#2a3f52)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Inter Tight",Inter,sans-serif;line-height:1.1;margin:0}
+h1{font-size:clamp(26px,4vw,36px);text-wrap:balance}h2{font-size:22px}
+.wrap{max-width:860px;margin:0 auto;padding:clamp(16px,3vw,32px) max(4vw,14px) 48px}
+header{background:var(--lake);color:#fff;padding:22px max(4vw,14px) 18px}
+header .in{max-width:860px;margin:0 auto}
+header p{margin:6px 0 0;opacity:.9}
+.strip{display:flex;gap:6px;margin-top:14px}
+.strip span{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.28);transition:background .3s}
+.strip span.done{background:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:clamp(16px,3vw,26px);margin-top:18px}
+.tag{display:inline-block;font-size:13px;font-weight:600;color:var(--lake);background:var(--lake2);padding:2px 10px;border-radius:99px;margin-bottom:8px}
+.lead{color:var(--muted);margin:6px 0 14px}
+label.f{display:block;font-weight:600;margin-bottom:6px}
+input[type=text],select{font:16px Inter,sans-serif;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:44px}
+button{font:600 16px Inter,sans-serif;min-height:44px;padding:0 18px;border-radius:10px;border:0;cursor:pointer;background:var(--lake);color:#fff}
+button.ghost{background:transparent;color:var(--lake);border:1px solid var(--lake)}
+button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+.pool,.bin .drop{display:flex;flex-wrap:wrap;gap:8px;min-height:56px}
+.pool{padding:10px;border:1px dashed var(--line);border-radius:12px}
+.chip{font:15px/1.35 Inter,sans-serif;text-align:left;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 12px;min-height:44px;max-width:100%;cursor:grab}
+.chip.sel{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
+.chip.right{background:var(--okbg);border-color:var(--ok)}.chip.wrong{background:var(--nobg);border-color:var(--no)}
+.bins{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:10px;margin-top:12px}
+.bin{border:2px solid var(--line);border-radius:12px;padding:10px;background:var(--card);cursor:pointer}
+.bin h3{font-size:16px;margin-bottom:2px}.bin small{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}
+.bin.hot{border-color:var(--acc)}
+.bin .drop{flex-direction:column}
+.mrow{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr) 28px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.mrow b{font-weight:600}
+@media(max-width:600px){.mrow{grid-template-columns:minmax(0,1fr) 28px}.mrow select{grid-column:1}.mrow .mk{grid-row:1;grid-column:2}}
+.mk{font-weight:700;text-align:center}.mk.y{color:var(--ok)}.mk.n{color:var(--no)}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px;margin-top:8px;cursor:pointer}
+.opt input{width:22px;height:22px;margin:2px 0 0;flex:none;accent-color:var(--lake)}
+.opt.right{background:var(--okbg);border-color:var(--ok)}.opt.wrong{background:var(--nobg);border-color:var(--no)}
+.fb{font-size:15px;margin-top:6px;color:var(--ink)}
+.fb:empty{display:none}
+.model{background:var(--bg);border-radius:12px;padding:12px;margin:8px 0 6px}
+.model svg{width:100%;height:auto;display:block}
+.quote{border-left:4px solid var(--acc);padding:4px 0 4px 12px;margin:10px 0;font-style:italic}
+.score{font-weight:600}
+.locked{font-size:14px;color:var(--muted)}
+.result{background:var(--lake);color:#fff;border:0}
+.result .big{font:700 clamp(40px,8vw,64px)/1 "Inter Tight",sans-serif}
+textarea{width:100%;font:14px/1.5 ui-monospace,Menlo,monospace;padding:12px;border-radius:10px;border:0;min-height:120px;color:#10202e;background:#fff}
+.note{font-size:13px;color:var(--muted);margin-top:28px}
+.result .note,.result .lead{color:#dce9f3}
+.hide{display:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1 id="title">MOSAIC Check-In</h1>
+  <p id="sub"></p>
+  <div class="strip" id="strip" aria-hidden="true"></div>
+</div></header>
+
+<main class="wrap" id="app">
+  <section class="card" id="who">
+    <span class="tag">Before you start</span>
+    <label class="f" for="pname">Your name, exactly as it appears in Canvas</label>
+    <input type="text" id="pname" autocomplete="name" placeholder="First Last">
+    <p class="lead" style="margin:8px 0 0">Your first answer on each activity is scored. You can retry afterward for practice; the score stays.</p>
+  </section>
+  <div id="acts"></div>
+  <section class="card result hide" id="done" aria-live="polite"></section>
+  <p class="note">Sample content for preview · MosesSTEMinc · MOSAIC Framework™</p>
+</main>
+
+<main class="wrap hide" id="verify">
+  <section class="card">
+    <span class="tag">Instructor tool</span>
+    <h2>Verify a completion receipt</h2>
+    <p class="lead">Enter the details exactly as they appear on the participant's receipt.</p>
+    <label class="f" for="vn">Name</label><input type="text" id="vn">
+    <div class="row" style="margin-top:10px">
+      <div style="flex:1 1 140px"><label class="f" for="vm">Module ID</label><input type="text" id="vm"></div>
+      <div style="flex:1 1 100px"><label class="f" for="vs">Points earned</label><input type="text" id="vs" inputmode="numeric"></div>
+      <div style="flex:1 1 100px"><label class="f" for="vt">Points possible</label><input type="text" id="vt" inputmode="numeric"></div>
+      <div style="flex:1 1 140px"><label class="f" for="vc">Code</label><input type="text" id="vc"></div>
+    </div>
+    <div class="row"><button id="vgo">Check receipt</button><span id="vout" class="score" aria-live="polite"></span></div>
+  </section>
+</main>
+
+<script>
+{
+/* ============ CONTENT: edit this block for each module / state edition ============ */
+const CONFIG = {
+  course: "More Fish, Less Food? · Michigan SCECH Edition",
+  salt: "MOSAIC-MI-2027",            // change per edition so codes can't be reused across editions
+  sheetUrl: "https://script.google.com/macros/s/AKfycbzU70Oy_hMpIHxJIUACK-eKPe6S2zA60zvEw3vc_90-Y7afmavwFe2Y8dC2qwH7vJM/exec",                    // paste your Google Apps Script web app URL here (ends in /exec)
+  sheetKey: "MOSAIC-MI-2027-key",    // must match KEY in the Apps Script
+  modules: {
+    "m3": {
+      title: "Module 3 Check-In: Modeling, Scaffolding & Assessment",
+      activities: [
+        { type:"sort", tag:"Sort", title:"Which MOSAIC element is the teacher using?",
+          prompt:"Tap a move, then tap the element it fits (or drag it). Tap a placed move to send it back.",
+          bins:[
+            {id:"M",name:"Modeling",hint:"Making thinking visible in models"},
+            {id:"O",name:"Observation",hint:"Examining student thinking and identifying learning needs"},
+            {id:"S",name:"Scaffolding",hint:"Supporting access to the same thinking"},
+            {id:"A",name:"Assessment",hint:"Checking and documenting progress"}],
+          items:[
+            {t:"Students draw an initial model explaining why fish numbers rose while food declined.",a:"M"},
+            {t:"Students revise their models after examining new population data.",a:"M"},
+            {t:"Listen in on partner talk and note which groups mention energy.",a:"O"},
+            {t:"Look across all student models for a shared gap, then plan tomorrow's lesson around it.",a:"O"},
+            {t:"Give a partially labeled model template with boxes for fish, food source, and energy.",a:"S"},
+            {t:"Post the frame “I think ___ happened because ___.”",a:"S"},
+            {t:"Exit ticket: “Circle the arrow in your model you are least sure about, and explain why.”",a:"A"},
+            {t:"Use a short rubric to check whether revised models include a mechanism.",a:"A"}]},
+
+        { type:"match", tag:"Match", title:"Match each MOSAIC step to its purpose",
+          prompt:"Choose the purpose that fits each step of the MOSAIC sequence.",
+          pairs:[
+            {l:"Anchoring Phenomenon",r:"Presents a puzzling, observable event that launches the storyline"},
+            {l:"Initial Models",r:"Makes students' first explanations visible before instruction"},
+            {l:"Evidence Gathering",r:"Collects data that can support or challenge current ideas"},
+            {l:"Revise Models",r:"Students change their models in light of new evidence"},
+            {l:"Consensus Model",r:"The class agrees on an explanation built from everyone's models"}]},
+
+        { type:"evaluate", tag:"Model evaluation", title:"Evaluate a student's initial model",
+          prompt:"Select every statement that is an accurate evaluation of this initial model.",
+          model:{boxes:["More fish in the lake","Less food","Fish get thinner"],
+                 quote:"There are too many fish so they ate all the food and now they're starving."},
+          options:[
+            {t:"The model shows a cause-and-effect chain between fish numbers and food.",c:true,
+             fb:"Yes. The arrows show a clear causal sequence, which is a strength to build on."},
+            {t:"The model fully explains how energy moves from food into the fish.",c:false,
+             fb:"Not yet. The model says food runs out but does not show what happens to energy once food is eaten."},
+            {t:"The model doesn't yet show what the fish's food depends on.",c:true,
+             fb:"Accurate. Nothing shows where the food comes from or what limits it."},
+            {t:"The model should be marked incorrect because it lacks scientific vocabulary.",c:false,
+             fb:"Initial models capture current thinking. Everyday language is expected here and is not an error."},
+            {t:"A useful next prompt: “What happens to the energy in the food once a fish eats it?”",c:true,
+             fb:"Yes. This pushes toward mechanism without giving away the answer."}]},
+
+        { type:"scenario", tag:"Scenario", title:"What would you do?",
+          questions:[
+            { q:"During Collaborative Sensemaking, one group insists the fish are thin because of disease and won't consider food. What is the best teacher move?",
+              options:[
+                {t:"Tell the group disease is incorrect and redirect them to food.",c:false,fb:"This ends their reasoning instead of building it, and the students never weigh the evidence themselves."},
+                {t:"Ask: “What evidence would help us tell disease and food shortage apart?”",c:true,fb:"Yes. This keeps their idea in play and turns the disagreement into an investigation."},
+                {t:"Move on, since the class will reach consensus later.",c:false,fb:"Consensus depends on working through competing ideas now, not skipping them."},
+                {t:"Assign a reading on food webs before continuing.",c:false,fb:"A reading may help later, but it doesn't take up the group's idea."}]},
+            { q:"Several participants' students need language support to explain their models. Which scaffold keeps the rigor?",
+              options:[
+                {t:"Replace the model with a vocabulary matching worksheet.",c:false,fb:"This lowers the cognitive demand. Students no longer explain a mechanism."},
+                {t:"Provide sentence frames and a word bank while students still explain the mechanism in their own model.",c:true,fb:"Yes. This gives access to the same thinking without reducing it."},
+                {t:"Give students the completed consensus model to copy.",c:false,fb:"Copying removes the sensemaking the model is meant to show."},
+                {t:"Let those students skip the written explanation.",c:false,fb:"Removing the explanation removes the evidence of their thinking."}]}]}
+      ]
+    }
+  }
+};
+/* ================================= ENGINE ================================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function code(name,mod,score,total){
+  const s=[CONFIG.salt,name.trim().toLowerCase().replace(/\s+/g," "),mod,score,total].join("|");
+  let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}
+  const A="ABCDEFGHJKMNPQRSTUVWXYZ23456789";let o="";for(let i=0;i<6;i++){o+=A[h%A.length];h=Math.floor(h/A.length)}return o;
+}
+const params=new URLSearchParams(location.search);
+const hash=location.hash.replace("#","");
+if(hash==="verify"||params.get("verify")!==null){
+  $("#app").classList.add("hide");$("#verify").classList.remove("hide");$("#title").textContent="Receipt Checker";
+  $("#sub").textContent=CONFIG.course;
+  $("#vgo").addEventListener("click",()=>{
+    const ok=code($("#vn").value,$("#vm").value.trim(),$("#vs").value.trim(),$("#vt").value.trim())===$("#vc").value.trim().toUpperCase();
+    $("#vout").textContent=ok?"✓ Valid receipt":"✗ Does not match. Check spelling and numbers.";
+    $("#vout").style.color=ok?"var(--ok)":"var(--no)";
+  });
+} else {
+const modId=params.get("m")||(CONFIG.modules[hash]?hash:Object.keys(CONFIG.modules)[0]);
+const MOD=CONFIG.modules[modId];
+$("#title").textContent=MOD.title;$("#sub").textContent=CONFIG.course;
+const state=MOD.activities.map(a=>({earned:null,total:0}));
+$("#strip").innerHTML=MOD.activities.map(()=>"<span></span>").join("");
+
+const SID=Math.random().toString(36).slice(2,10);
+function send(payload,el){
+  if(!CONFIG.sheetUrl)return;
+  const msg=t=>{if(el){const s=el.querySelector(".saved");if(s)s.textContent=t}};
+  try{
+    // Hidden form post into a hidden frame: works from Canvas, GitHub Pages, or a file opened on the desktop
+    const id="sink"+Math.random().toString(36).slice(2,8);
+    const fr=document.createElement("iframe");fr.name=id;fr.style.display="none";document.body.appendChild(fr);
+    const f=document.createElement("form");f.method="POST";f.action=CONFIG.sheetUrl;f.target=id;f.style.display="none";
+    const inp=document.createElement("input");inp.type="hidden";inp.name="payload";
+    inp.value=JSON.stringify(Object.assign({key:CONFIG.sheetKey,edition:CONFIG.course,module:modId,name:$("#pname").value.trim(),session:SID},payload));
+    f.appendChild(inp);document.body.appendChild(f);
+    fr.addEventListener("load",()=>{msg("✓ Score sent to instructor.");setTimeout(()=>fr.remove(),5000)});
+    f.submit();f.remove();msg("Sending score…");
+  }catch(e){msg("Couldn't reach the instructor's sheet. Your receipt still counts.")}
+}
+function finish(i,earned,total,el,answers){
+  if(state[i].earned===null){state[i]={earned,total};$("#strip").children[i].classList.add("done");
+    $("#pname").readOnly=true;
+    send({type:"activity",activity:i+1,title:MOD.activities[i].title,kind:MOD.activities[i].type,score:earned,possible:total,answers:(answers||[]).join(" | ")},el);}
+  const st=state[i];
+  el.querySelector(".score").textContent=`First-attempt score: ${st.earned} / ${st.total}`;
+  el.querySelector(".locked").textContent=earned===st.earned&&total===st.total&&el.dataset.tries==="1"?"":"Practice attempt shown. Your recorded score is the first attempt.";
+  el.querySelector(".check").classList.add("hide");el.querySelector(".retry").classList.remove("hide");
+  if(state.every(s=>s.earned!==null))showDone();
+}
+const footer=`<div class="row"><button class="check">Check answers</button><button class="ghost retry hide">Try again for practice</button><span class="score"></span></div><div class="locked"></div><div class="locked saved" aria-live="polite"></div>`;
+
+const R={
+ sort(a,el,i){
+  let pick=null;
+  const draw=()=>{
+   el.querySelector(".body").innerHTML=`<div class="pool" data-bin="">${""}</div><div class="bins">${a.bins.map(b=>`<div class="bin" data-bin="${b.id}" tabindex="0" role="button" aria-label="Place in ${esc(b.name)}"><h3>${esc(b.name)}</h3><small>${esc(b.hint)}</small><div class="drop"></div></div>`).join("")}</div>`;
+   const pool=el.querySelector(".pool");
+   shuffle(a.items.map((it,k)=>k)).forEach(k=>{
+    const c=document.createElement("button");c.className="chip";c.textContent=a.items[k].t;c.dataset.k=k;c.draggable=true;
+    c.addEventListener("click",e=>{e.stopPropagation();if(el.dataset.checked)return;
+      if(c.parentElement!==pool){pool.appendChild(c);return}
+      el.querySelectorAll(".chip.sel").forEach(x=>x!==c&&x.classList.remove("sel"));c.classList.toggle("sel");pick=c.classList.contains("sel")?c:null});
+    c.addEventListener("dragstart",e=>{pick=c;e.dataTransfer.setData("text/plain",k)});
+    pool.appendChild(c);
+   });
+   el.querySelectorAll(".bin").forEach(b=>{
+    const put=()=>{if(!pick||el.dataset.checked)return;pick.classList.remove("sel");b.querySelector(".drop").appendChild(pick);pick=null};
+    b.addEventListener("click",put);b.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();put()}});
+    b.addEventListener("dragover",e=>{e.preventDefault();b.classList.add("hot")});
+    b.addEventListener("dragleave",()=>b.classList.remove("hot"));
+    b.addEventListener("drop",e=>{e.preventDefault();b.classList.remove("hot");put()});
+   });
+  };
+  draw();
+  el.querySelector(".check").onclick=()=>{
+   if(el.querySelector(".pool").children.length){el.querySelector(".score").textContent="Place every move before checking.";return}
+   el.dataset.checked=1;let n=0;
+   el.querySelectorAll(".bin").forEach(b=>b.querySelectorAll(".chip").forEach(c=>{const ok=a.items[c.dataset.k].a===b.dataset.bin;n+=ok;c.classList.add(ok?"right":"wrong");c.setAttribute("aria-label",c.textContent+(ok?" — correct":" — belongs in "+a.bins.find(x=>x.id===a.items[c.dataset.k].a).name));if(!ok)c.title="Belongs in "+a.bins.find(x=>x.id===a.items[c.dataset.k].a).name}));
+   el.querySelector(".fbx").textContent=n===a.items.length?"All placed correctly.":"Red moves are misplaced. Hover or focus one to see where it belongs.";
+   const ans=[];el.querySelectorAll(".bin").forEach(b=>b.querySelectorAll(".chip").forEach(c=>ans.push(c.textContent+" → "+b.querySelector("h3").textContent)));
+   finish(i,n,a.items.length,el,ans);
+  };
+  el.querySelector(".retry").onclick=()=>{delete el.dataset.checked;el.dataset.tries="2";el.querySelector(".fbx").textContent="";draw();el.querySelector(".check").classList.remove("hide");el.querySelector(".retry").classList.add("hide")};
+ },
+ match(a,el,i){
+  const rights=shuffle(a.pairs.map(p=>p.r));
+  const draw=()=>{el.querySelector(".body").innerHTML=a.pairs.map((p,k)=>`<div class="mrow"><b id="ml${i}_${k}">${esc(p.l)}</b><select aria-labelledby="ml${i}_${k}" data-k="${k}"><option value="">Choose a purpose…</option>${rights.map(r=>`<option>${esc(r)}</option>`).join("")}</select><span class="mk" aria-live="polite"></span></div>`).join("")};
+  draw();
+  el.querySelector(".check").onclick=()=>{
+   const sels=[...el.querySelectorAll("select")];
+   if(sels.some(s=>!s.value)){el.querySelector(".score").textContent="Choose a purpose for every step.";return}
+   let n=0;sels.forEach(s=>{const ok=s.value===a.pairs[s.dataset.k].r;n+=ok;const m=s.nextElementSibling;m.textContent=ok?"✓":"✗";m.className="mk "+(ok?"y":"n");s.disabled=true;if(!ok)s.title="Correct: "+a.pairs[s.dataset.k].r});
+   el.querySelector(".fbx").textContent=n===a.pairs.length?"All matched.":"Correct purposes: "+a.pairs.map(p=>p.l+": "+p.r).join(" · ");
+   finish(i,n,a.pairs.length,el,sels.map(s=>a.pairs[s.dataset.k].l+" → "+s.value));
+  };
+  el.querySelector(".retry").onclick=()=>{el.dataset.tries="2";el.querySelector(".fbx").textContent="";draw();el.querySelector(".check").classList.remove("hide");el.querySelector(".retry").classList.add("hide")};
+ },
+ evaluate(a,el,i){
+  const b=a.model.boxes,W=640,bw=170,gap=(W-bw*b.length)/(b.length-1);
+  const svg=`<svg viewBox="0 0 ${W} 90" role="img" aria-label="Student model: ${esc(b.join(" leads to "))}"><defs><marker id="ar${i}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#e8661c"/></marker></defs>${b.map((t,k)=>{const x=k*(bw+gap);return `<rect x="${x}" y="15" width="${bw}" height="60" rx="10" fill="var(--card)" stroke="var(--lake)" stroke-width="2"/><text x="${x+bw/2}" y="50" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="600" fill="var(--ink)">${esc(t)}</text>`+(k<b.length-1?`<line x1="${x+bw+4}" y1="45" x2="${x+bw+gap-6}" y2="45" stroke="#e8661c" stroke-width="3" marker-end="url(#ar${i})"/>`:"")}).join("")}</svg>`;
+  const draw=()=>{el.querySelector(".body").innerHTML=`<div class="model">${svg}</div><div class="quote">Student explanation: “${esc(a.model.quote)}”</div>${a.options.map((o,k)=>`<label class="opt"><input type="checkbox" data-k="${k}"><span><span>${esc(o.t)}</span><div class="fb"></div></span></label>`).join("")}`};
+  draw();
+  el.querySelector(".check").onclick=()=>{
+   let n=0;el.querySelectorAll(".opt").forEach(l=>{const cb=l.querySelector("input"),o=a.options[cb.dataset.k],ok=cb.checked===o.c;n+=ok;cb.disabled=true;l.classList.add(ok?"right":"wrong");l.querySelector(".fb").textContent=(ok?"✓ ":"✗ ")+o.fb});
+   el.querySelector(".fbx").textContent="Each statement scores a point when you judge it correctly: selected if accurate, left blank if not.";
+   finish(i,n,a.options.length,el,[...el.querySelectorAll(".opt input:checked")].map(cb=>"Selected: "+a.options[cb.dataset.k].t));
+  };
+  el.querySelector(".retry").onclick=()=>{el.dataset.tries="2";el.querySelector(".fbx").textContent="";draw();el.querySelector(".check").classList.remove("hide");el.querySelector(".retry").classList.add("hide")};
+ },
+ scenario(a,el,i){
+  const draw=()=>{el.querySelector(".body").innerHTML=a.questions.map((q,qi)=>`<fieldset style="border:0;padding:0;margin:${qi?"22px":"0"} 0 0"><legend style="font-weight:600;padding:0">${qi+1}. ${esc(q.q)}</legend>${q.options.map((o,k)=>`<label class="opt"><input type="radio" name="s${i}_${qi}" value="${k}"><span><span>${esc(o.t)}</span><div class="fb"></div></span></label>`).join("")}</fieldset>`).join("")};
+  draw();
+  el.querySelector(".check").onclick=()=>{
+   if(a.questions.some((q,qi)=>!el.querySelector(`input[name=s${i}_${qi}]:checked`))){el.querySelector(".score").textContent="Answer every question first.";return}
+   let n=0;a.questions.forEach((q,qi)=>{el.querySelectorAll(`input[name=s${i}_${qi}]`).forEach(r=>{const o=q.options[r.value],l=r.closest(".opt");r.disabled=true;
+     if(r.checked){n+=o.c;l.classList.add(o.c?"right":"wrong");l.querySelector(".fb").textContent=(o.c?"✓ ":"✗ ")+o.fb}
+     else if(o.c){l.classList.add("right");l.querySelector(".fb").textContent="Best answer: "+o.fb}})});
+   finish(i,n,a.questions.length,el,a.questions.map((q,qi)=>"Q"+(qi+1)+": "+q.options[el.querySelector(`input[name=s${i}_${qi}]:checked`).value].t));
+  };
+  el.querySelector(".retry").onclick=()=>{el.dataset.tries="2";draw();el.querySelector(".check").classList.remove("hide");el.querySelector(".retry").classList.add("hide")};
+ }
+};
+
+MOD.activities.forEach((a,i)=>{
+  const el=document.createElement("section");el.className="card";el.dataset.tries="1";
+  el.innerHTML=`<span class="tag">Activity ${i+1} · ${esc(a.tag)}</span><h2>${esc(a.title)}</h2>${a.prompt?`<p class="lead">${esc(a.prompt)}</p>`:""}<div class="body"></div><p class="fb fbx"></p>${footer}`;
+  $("#acts").appendChild(el);R[a.type](a,el,i);
+  const btn=el.querySelector(".check"),orig=btn.onclick;
+  btn.onclick=()=>{if(!$("#pname").value.trim()&&state[i].earned===null){el.querySelector(".score").textContent="Enter your name at the top first.";$("#pname").focus();return}orig()};
+});
+
+function showDone(){
+  const earned=state.reduce((s,x)=>s+x.earned,0),total=state.reduce((s,x)=>s+x.total,0),pct=Math.round(earned/total*100);
+  const d=$("#done");d.classList.remove("hide");
+  d.innerHTML=`<span class="tag" style="background:#fff">Complete</span><div class="big">${pct}%</div><p class="lead">${earned} of ${total} points on first attempts.</p>
+  <div id="needname"></div><label class="f" for="rcpt" style="margin-top:12px">Your completion receipt</label>
+  <textarea id="rcpt" readonly></textarea>
+  <div class="row"><button id="copy" style="background:#fff;color:var(--lake)">Copy receipt</button><span id="cmsg"></span></div>
+  <p class="lead" style="margin-top:12px">Paste this receipt at the top of your submission for this assignment.</p>`;
+  const build=()=>{const n=$("#pname").value.trim();
+    $("#needname").innerHTML=n?"":`<p style="background:#fff;color:#b3261e;padding:10px 12px;border-radius:10px;margin:0">Enter your name at the top of the page. The receipt updates automatically.</p>`;
+    $("#rcpt").value=n?`MOSAIC Check-In Receipt\nCourse: ${CONFIG.course}\nModule: ${modId} | ${MOD.title}\nName: ${n}\nScore: ${earned}/${total} (${pct}%)\nCompleted: ${new Date().toLocaleString()}\nCode: ${code(n,modId,earned,total)}`:"";};
+  build();$("#pname").addEventListener("input",build);
+  const n0=$("#pname").value.trim();
+  send({type:"complete",score:earned,possible:total,percent:pct,code:code(n0,modId,earned,total)},d);
+  $("#copy").addEventListener("click",()=>{const t=$("#rcpt");if(!t.value)return;
+    (navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>$("#cmsg").textContent="Copied.").catch(()=>{t.select();$("#cmsg").textContent="Press Ctrl/Cmd+C to copy."})});
+  d.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+}
+}
+}
+</script>
+</body>
+</html>
