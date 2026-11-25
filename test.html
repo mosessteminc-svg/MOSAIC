@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MOSAIC Check-In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* MOSAIC Interactive Check-In engine v2 · MosesSTEMinc L3C
+   Engine only: all course content lives in the edition file (e.g. michigan.js).
+   Lake blue ground, white cards, signal orange accent; Inter Tight + Inter. */
+:root{color-scheme:light dark;
+ --bg:light-dark(#eef3f7,#0c1620);--card:light-dark(#ffffff,#14222f);--ink:light-dark(#10202e,#e7eef4);
+ --muted:light-dark(#526474,#9fb1c1);--lake:light-dark(#0f4c75,#5fa8d8);--lake2:light-dark(#d9e8f3,#1b3347);
+ --acc:#e8661c;--ok:light-dark(#1d7a46,#5cd08e);--okbg:light-dark(#e3f4ea,#17321f);--no:light-dark(#b3261e,#ff8a80);--nobg:light-dark(#fbe7e5,#3a1c1a);--line:light-dark(#cfdbe5,#2a3f52);--warn:light-dark(#8a4b00,#ffc074)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Inter Tight",Inter,sans-serif;line-height:1.1;margin:0}
+h1{font-size:clamp(26px,4vw,36px);text-wrap:balance}h2{font-size:22px}
+a{color:var(--lake)}
+.wrap{max-width:860px;margin:0 auto;padding:clamp(16px,3vw,32px) max(4vw,14px) 32px}
+header{background:#0f4c75;color:#fff;padding:18px max(4vw,14px) 18px}
+header .in{max-width:860px;margin:0 auto}
+.brand{font-size:14px;opacity:.92;margin-bottom:8px}
+header p{margin:6px 0 0;opacity:.92}
+.strip{display:flex;gap:6px;margin-top:14px}
+.strip span{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.28);transition:background .3s}
+.strip span.done{background:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:clamp(16px,3vw,26px);margin-top:18px}
+.tag{display:inline-block;font-size:13px;font-weight:600;color:var(--lake);background:var(--lake2);padding:2px 10px;border-radius:99px;margin-bottom:8px}
+.lead{color:var(--muted);margin:6px 0 14px}
+.illus{font-size:13px;color:var(--muted);font-style:italic;margin:-6px 0 12px}
+label.f{display:block;font-weight:600;margin-bottom:6px}
+input[type=text],select{font:16px Inter,sans-serif;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:44px}
+button{font:600 16px Inter,sans-serif;min-height:44px;padding:0 18px;border-radius:10px;border:0;cursor:pointer;background:var(--lake);color:#fff}
+button.ghost{background:transparent;color:var(--lake);border:1px solid var(--lake)}
+button.small{min-height:36px;font-size:14px;padding:0 12px}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+.pool,.bin .drop{display:flex;flex-wrap:wrap;gap:8px;min-height:56px}
+.pool{padding:10px;border:1px dashed var(--line);border-radius:12px}
+.chip{font:15px/1.35 Inter,sans-serif;text-align:left;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 12px;min-height:44px;max-width:100%;cursor:grab}
+.chip.sel{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
+.chip.right{background:var(--okbg);border-color:var(--ok)}.chip.wrong{background:var(--nobg);border-color:var(--no)}
+.bins{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px;margin-top:12px}
+.bin{border:2px solid var(--line);border-radius:12px;padding:10px;background:var(--card);cursor:pointer}
+.bin h3{font-size:16px;margin-bottom:2px}.bin small{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}
+.bin.hot{border-color:var(--acc)}
+.bin .drop{flex-direction:column}
+.mrow{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.5fr) 28px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.mrow b{font-weight:600}
+@media(max-width:600px){.mrow{grid-template-columns:minmax(0,1fr) 28px}.mrow select{grid-column:1}.mrow .mk{grid-row:1;grid-column:2}}
+.mk{font-weight:700;text-align:center}.mk.y{color:var(--ok)}.mk.n{color:var(--no)}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px;margin-top:8px;cursor:pointer}
+.opt input{width:22px;height:22px;margin:2px 0 0;flex:none;accent-color:var(--lake)}
+.opt.right{background:var(--okbg);border-color:var(--ok)}.opt.wrong{background:var(--nobg);border-color:var(--no)}
+.fb{font-size:15px;margin-top:6px}
+.fb:empty{display:none}
+.ifb{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:8px}
+.ifb:empty{display:none}
+.ifb li{font-size:15px;padding:8px 12px;border-radius:10px;border-left:4px solid var(--ok);background:var(--okbg)}
+.ifb li.no{border-left-color:var(--no);background:var(--nobg)}
+.stim{margin:4px 0 14px;padding:12px;border-radius:12px;background:var(--bg)}
+.stim figcaption{font-weight:600;margin-bottom:8px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font-weight:600;background:var(--lake2)}
+.src{font-size:13px;color:var(--muted);margin:8px 0 0}
+.models{display:grid;gap:10px;margin:4px 0 14px}
+.mdl{background:var(--bg);border-radius:12px;padding:12px}
+.mlabel{font-weight:700;font-family:"Inter Tight",sans-serif;margin-bottom:8px}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.box{border:2px solid var(--lake);background:var(--card);border-radius:10px;padding:8px 12px;font-weight:600;font-size:15px}
+.arr{color:var(--acc);font-weight:700;font-size:14px;display:flex;align-items:center;gap:4px}
+.mcap{margin:8px 0 0;font-size:15px}
+.score{font-weight:600}
+.locked{font-size:14px;color:var(--muted)}
+.saved{font-size:14px;margin-top:6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.saved.ok{color:var(--ok)}.saved.warn{color:var(--warn)}
+.result{background:#0f4c75;color:#fff;border:0}
+.result .big{font:700 clamp(40px,8vw,64px)/1 "Inter Tight",sans-serif}
+.result .lead,.result .note{color:#dce9f3}
+.result .tag{background:#fff}
+.result .saved.ok{color:#bff0d2}.result .saved.warn{color:#ffd9a8}
+.result ul{margin:8px 0 0;padding-left:20px}
+.mastery{display:inline-block;margin-top:10px;padding:6px 12px;border-radius:99px;font-weight:600;background:#fff;color:#0f4c75}
+textarea{width:100%;font:14px/1.5 ui-monospace,Menlo,monospace;padding:12px;border-radius:10px;border:0;min-height:220px;color:#10202e;background:#fff}
+.next{background:#fff;color:#10202e;border-radius:12px;padding:12px 14px;margin-top:14px}
+footer{max-width:860px;margin:0 auto;padding:0 max(4vw,14px) 40px;font-size:13px;color:var(--muted)}
+footer h3{font-size:15px;color:var(--ink);margin:18px 0 6px}
+footer ol{padding-left:18px;margin:0}
+footer li{margin-bottom:4px;overflow-wrap:anywhere}
+.mods{display:grid;gap:10px;margin-top:12px}
+.mods a{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;color:var(--ink);font-weight:600}
+.hide{display:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <div class="brand">MosesSTEMinc L3C · Professional Learning Academy · MOSAIC Framework™</div>
+  <h1 id="title">MOSAIC Check-In</h1>
+  <p id="sub"></p>
+  <div class="strip" id="strip" aria-hidden="true"></div>
+</div></header>
+
+<main class="wrap hide" id="app">
+  <section class="card" id="who">
+    <span class="tag">Before you start</span>
+    <p class="lead" id="intro" style="margin-top:0"></p>
+    <label class="f" for="pname">Your name, exactly as it appears in Canvas</label>
+    <input type="text" id="pname" autocomplete="name" placeholder="First Last" maxlength="100">
+    <p class="lead" style="margin:8px 0 0">Your first answer on each activity is scored and sent to your instructor. You can retry any activity for practice; the first score stays. Mastery target: 80%.</p>
+  </section>
+  <div id="acts"></div>
+  <section class="card result hide" id="done" aria-live="polite"></section>
+</main>
+
+<main class="wrap hide" id="chooser">
+  <section class="card">
+    <span class="tag">Choose a module</span>
+    <p class="lead">Open the check-in from your Canvas assignment, or choose a module below.</p>
+    <div class="mods" id="modlist"></div>
+  </section>
+</main>
+
+<main class="wrap hide" id="verify">
+  <section class="card">
+    <span class="tag">Instructor tool</span>
+    <h2>Verify a completion receipt</h2>
+    <p class="lead">Enter the details exactly as they appear on the participant’s receipt. A matching code shows the receipt wasn’t edited. It is not proof of identity.</p>
+    <label class="f" for="vn">Name</label><input type="text" id="vn">
+    <div class="row" style="margin-top:10px">
+      <div style="flex:1 1 140px"><label class="f" for="vm">Module ID (e.g. m3)</label><input type="text" id="vm"></div>
+      <div style="flex:1 1 100px"><label class="f" for="vs">Points earned</label><input type="text" id="vs" inputmode="numeric"></div>
+      <div style="flex:1 1 100px"><label class="f" for="vt">Points possible</label><input type="text" id="vt" inputmode="numeric"></div>
+      <div style="flex:1 1 140px"><label class="f" for="vc">Code</label><input type="text" id="vc"></div>
+    </div>
+    <div class="row"><button id="vgo">Check receipt</button><span id="vout" class="score" aria-live="polite"></span></div>
+  </section>
+</main>
+
+<footer id="foot"></footer>
+
+<!-- EDITION CONTENT FILE: change this one line to use a different state edition -->
+<script src="michigan.js"></script>
+
+<script>
+(function(){
+const ED = window.MOSAIC_EDITION;
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+if (!ED) {
+  document.getElementById("app").classList.remove("hide");
+  document.getElementById("app").innerHTML = '<section class="card"><h2>Content file not found</h2><p class="lead">This page needs its content file (michigan.js) in the same folder. Please let your instructor know.</p></section>';
+  return;
+}
+
+function code(name, mod, score, total) {
+  const s = [ED.salt, String(name).trim().toLowerCase().replace(/\s+/g, " "), mod, score, total].join("|");
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  const A = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; let o = "";
+  for (let i = 0; i < 6; i++) { o += A[h % A.length]; h = Math.floor(h / A.length); }
+  return o;
+}
+
+/* ---------- footer: branding + sources ---------- */
+function footer(mod) {
+  const keys = mod ? mod.sources : Object.keys(ED.sources);
+  const list = keys.map(k => ED.sources[k]).filter(Boolean)
+    .map(s => `<li>${esc(s.label)} ${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url.replace(/^https?:\/\//, ""))}</a>` : ""}</li>`).join("");
+  $("#foot").innerHTML = `<h3>Sources</h3><ol>${list}</ol>
+    <p>Student models, student statements, and classroom scenarios marked “illustrative” or “hypothetical” were created for professional learning and are not actual student work. Scientific findings are reported only as stated in the cited sources.</p>
+    <p><b>MosesSTEMinc L3C</b> · Professional Learning Academy · MOSAIC Framework™ · ${esc(ED.editionLabel)} · <a href="https://www.mosesscience.net" target="_blank" rel="noopener">www.mosesscience.net</a><br>
+    © 2026 MosesSTEMinc L3C. All rights reserved. MOSAIC Framework™ is a trademark of MosesSTEMinc L3C. Redistribution or commercial resale requires written permission.</p>`;
+}
+
+/* ---------- saving: server-confirmed (JSONP to Google Apps Script) ---------- */
+let seq = 0;
+function jsonp(payload) {
+  return new Promise((resolve, reject) => {
+    const cb = "mosaicCb" + Date.now().toString(36) + (seq++);
+    const s = document.createElement("script");
+    const timer = setTimeout(() => { done(); reject(new Error("timeout")); }, 20000);
+    function done() { clearTimeout(timer); window[cb] = function () {}; s.remove(); }
+    window[cb] = data => { done(); resolve(data); };
+    s.onerror = () => { done(); reject(new Error("network")); };
+    s.src = ED.sheetUrl + "?" + new URLSearchParams({ action: "save", payload: JSON.stringify(payload), callback: cb }).toString();
+    document.head.appendChild(s);
+  });
+}
+function save(payload, statusEl, okText) {
+  const set = (cls, html) => { statusEl.className = "saved " + cls; statusEl.innerHTML = html; };
+  if (!ED.sheetUrl) { set("warn", "Scores are not being sent: no instructor sheet is set up for this page."); return; }
+  const full = Object.assign({ key: ED.sheetKey, edition: ED.editionLabel, module: modId, name: $("#pname").value.trim(), session: SID }, payload);
+  const attempt = (tries) => {
+    set("", "Saving your score…");
+    jsonp(full).then(r => {
+      if (r && r.ok) {
+        if (r.duplicate && payload.type === "complete" && r.reason === "name") set("ok", "✓ A completion for this name and module was already recorded. Your first completion stands.");
+        else set("ok", r.duplicate ? "✓ Already saved to your instructor’s record." : okText);
+      } else {
+        set("warn", "⚠ Not saved: " + esc((r && r.error) || "the instructor’s sheet did not accept it") + ".");
+      }
+    }).catch(() => {
+      if (tries < 2) { setTimeout(() => attempt(tries + 1), 1500); return; }
+      set("warn", "⚠ Not confirmed yet. Your answers are still on this page. <button class=\"small ghost\" type=\"button\">Try again</button>");
+      statusEl.querySelector("button").addEventListener("click", () => attempt(1));
+    });
+  };
+  attempt(1);
+}
+
+/* ---------- routing ---------- */
+const params = new URLSearchParams(location.search);
+const hash = location.hash.replace("#", "");
+const SID = Math.random().toString(36).slice(2, 10);
+let modId = params.get("m") || (ED.modules[hash] ? hash : "");
+const MOD = ED.modules[modId];
+
+if (hash === "verify" || params.get("verify") !== null) {
+  $("#verify").classList.remove("hide"); $("#title").textContent = "Receipt Checker";
+  $("#sub").textContent = ED.course + " · " + ED.editionLabel; footer(null);
+  $("#vgo").addEventListener("click", () => {
+    const ok = code($("#vn").value, $("#vm").value.trim(), $("#vs").value.trim(), $("#vt").value.trim()) === $("#vc").value.trim().toUpperCase();
+    $("#vout").textContent = ok ? "✓ Code matches this name and score" : "✗ Does not match. Check spelling and numbers.";
+    $("#vout").style.color = ok ? "var(--ok)" : "var(--no)";
+  });
+  return;
+}
+if (!MOD) {
+  $("#chooser").classList.remove("hide"); $("#title").textContent = "MOSAIC Check-Ins";
+  $("#sub").textContent = ED.course + " · " + ED.editionLabel; footer(null);
+  $("#modlist").innerHTML = Object.keys(ED.modules).map(k => `<a href="?m=${esc(k)}">${esc(ED.modules[k].title)}<br><span class="locked">${esc(ED.modules[k].assignment)}</span></a>`).join("");
+  return;
+}
+
+/* ---------- module page ---------- */
+$("#app").classList.remove("hide");
+document.title = MOD.title;
+$("#title").textContent = MOD.title;
+$("#sub").textContent = ED.course + " · " + ED.editionLabel;
+$("#intro").textContent = MOD.intro + " Then continue to " + MOD.assignment + ".";
+footer(MOD);
+const state = MOD.activities.map(() => ({ earned: null, total: 0 }));
+$("#strip").innerHTML = MOD.activities.map(() => "<span></span>").join("");
+
+function stimulus(st) {
+  if (!st) return "";
+  if (st.kind === "table") {
+    const s = ED.sources[st.source];
+    return `<figure class="stim" style="margin-left:0;margin-right:0"><figcaption>${esc(st.caption)}</figcaption><div class="scroll"><table><thead><tr>${st.head.map(h => `<th scope="col">${esc(h)}</th>`).join("")}</tr></thead><tbody>${st.rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>${s ? `<p class="src">Source: ${esc(s.short || s.label)}</p>` : ""}</figure>`;
+  }
+  if (st.kind === "models") {
+    return `<div class="models">${st.items.map(m => `<div class="mdl"><div class="mlabel">${esc(m.label)}</div><div class="chain" role="img" aria-label="${esc(m.chain.join(" leads to "))}">${m.chain.map((b, i) => `<span class="box">${esc(b)}</span>` + (i < m.chain.length - 1 ? `<span class="arr" aria-hidden="true">${m.arrows && m.arrows[i] ? `<small>${esc(m.arrows[i])}</small>` : ""}→</span>` : "")).join("")}</div>${m.caption ? `<p class="mcap">${esc(m.caption)}</p>` : ""}</div>`).join("")}</div>`;
+  }
+  return "";
+}
+
+function finish(i, earned, total, el, answers) {
+  const first = state[i].earned === null;
+  if (first) {
+    state[i] = { earned, total };
+    $("#strip").children[i].classList.add("done");
+    $("#pname").readOnly = true;
+    const a = MOD.activities[i];
+    save({ type: "activity", activity: i + 1, title: a.title, kind: a.type, score: earned, possible: total,
+           answers: (answers || []).join(" | ").slice(0, 1500) }, el.querySelector(".saved"), "✓ Score saved to your instructor’s record.");
+  }
+  el.querySelector(".score").textContent = `First-attempt score: ${state[i].earned} / ${state[i].total}`;
+  el.querySelector(".locked").textContent = first ? "" : `Practice attempt: ${earned} / ${total}. Your recorded score is the first attempt.`;
+  el.querySelector(".check").classList.add("hide"); el.querySelector(".retry").classList.remove("hide");
+  if (first && state.every(s => s.earned !== null)) showDone();
+}
+function resetUI(el) {
+  el.querySelector(".fbx").textContent = ""; el.querySelector(".ifb").innerHTML = "";
+  el.querySelector(".check").classList.remove("hide"); el.querySelector(".retry").classList.add("hide");
+}
+const itemFb = (ok, text, extra) => `<li class="${ok ? "" : "no"}"><b>${ok ? "✓" : "✗"}</b> ${esc(text)}${extra ? " " + esc(extra) : ""}</li>`;
+
+const R = {
+ sort(a, el, i) {
+  let pick = null;
+  const draw = () => {
+   el.querySelector(".body").innerHTML = `<div class="pool" aria-label="Items to sort"></div><div class="bins">${a.bins.map(b => `<div class="bin" data-bin="${esc(b.id)}" tabindex="0" role="button" aria-label="Place in ${esc(b.name)}"><h3>${esc(b.name)}</h3><small>${esc(b.hint || "")}</small><div class="drop"></div></div>`).join("")}</div>`;
+   const pool = el.querySelector(".pool");
+   shuffle(a.items.map((it, k) => k)).forEach(k => {
+    const c = document.createElement("button"); c.type = "button"; c.className = "chip"; c.textContent = a.items[k].t; c.dataset.k = k; c.draggable = true;
+    c.addEventListener("click", e => { e.stopPropagation(); if (el.dataset.checked) return;
+      if (c.parentElement !== pool) {
+        // A move is selected and the user tapped a placed item: place into that item's box instead
+        if (pick && pick !== c) { pick.classList.remove("sel"); c.parentElement.appendChild(pick); pick.focus(); pick = null; return; }
+        pool.appendChild(c); return; }
+      el.querySelectorAll(".chip.sel").forEach(x => x !== c && x.classList.remove("sel"));
+      c.classList.toggle("sel"); pick = c.classList.contains("sel") ? c : null; });
+    c.addEventListener("dragstart", e => { pick = c; e.dataTransfer.setData("text/plain", k); });
+    pool.appendChild(c);
+   });
+   el.querySelectorAll(".bin").forEach(b => {
+    const put = () => { if (!pick || el.dataset.checked) return; pick.classList.remove("sel"); b.querySelector(".drop").appendChild(pick); pick.focus(); pick = null; };
+    b.addEventListener("click", put);
+    b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); put(); } });
+    b.addEventListener("dragover", e => { e.preventDefault(); b.classList.add("hot"); });
+    b.addEventListener("dragleave", () => b.classList.remove("hot"));
+    b.addEventListener("drop", e => { e.preventDefault(); b.classList.remove("hot"); put(); });
+   });
+  };
+  draw();
+  el.querySelector(".check").onclick = () => {
+   if (el.querySelector(".pool").children.length) { el.querySelector(".score").textContent = "Place every item before checking."; return; }
+   el.dataset.checked = 1; let n = 0; const ans = [], fbs = [];
+   el.querySelectorAll(".bin").forEach(b => b.querySelectorAll(".chip").forEach(c => {
+     const it = a.items[c.dataset.k], ok = it.a === b.dataset.bin, right = a.bins.find(x => x.id === it.a).name;
+     n += ok; c.classList.add(ok ? "right" : "wrong");
+     c.setAttribute("aria-label", c.textContent + (ok ? ": correct" : ": belongs in " + right));
+     ans.push(it.t.slice(0, 60) + " → " + b.querySelector("h3").textContent);
+     fbs.push(itemFb(ok, ok ? right + "." : "Belongs in " + right + ".", it.fb));
+   }));
+   el.querySelector(".ifb").innerHTML = fbs.join("");
+   finish(i, n, a.items.length, el, ans);
+  };
+  el.querySelector(".retry").onclick = () => { delete el.dataset.checked; resetUI(el); draw(); };
+ },
+
+ match(a, el, i) {
+  const opts = a.options || shuffle([...new Set(a.pairs.map(p => p.r))]);
+  const draw = () => { el.querySelector(".body").innerHTML = a.pairs.map((p, k) => `<div class="mrow"><b id="ml${i}_${k}">${esc(p.l)}</b><select aria-labelledby="ml${i}_${k}" data-k="${k}"><option value="">Choose…</option>${opts.map(r => `<option>${esc(r)}</option>`).join("")}</select><span class="mk" aria-live="polite"></span></div>`).join(""); };
+  draw();
+  el.querySelector(".check").onclick = () => {
+   const sels = [...el.querySelectorAll("select")];
+   if (sels.some(s => !s.value)) { el.querySelector(".score").textContent = "Make a choice for every row."; return; }
+   let n = 0; const fbs = [];
+   sels.forEach(s => { const p = a.pairs[s.dataset.k], ok = s.value === p.r; n += ok;
+     const m = s.nextElementSibling; m.textContent = ok ? "✓" : "✗"; m.className = "mk " + (ok ? "y" : "n"); s.disabled = true;
+     fbs.push(itemFb(ok, p.l + ": " + p.r + ".", p.fb)); });
+   el.querySelector(".ifb").innerHTML = fbs.join("");
+   finish(i, n, a.pairs.length, el, sels.map(s => a.pairs[s.dataset.k].l.slice(0, 40) + " → " + s.value.slice(0, 50)));
+  };
+  el.querySelector(".retry").onclick = () => { resetUI(el); draw(); };
+ },
+
+ evaluate(a, el, i) {
+  const draw = () => { el.querySelector(".body").innerHTML = a.options.map((o, k) => `<label class="opt"><input type="checkbox" data-k="${k}"><span><span>${esc(o.t)}</span><div class="fb"></div></span></label>`).join(""); };
+  draw();
+  el.querySelector(".check").onclick = () => {
+   let n = 0;
+   el.querySelectorAll(".opt").forEach(l => { const cb = l.querySelector("input"), o = a.options[cb.dataset.k], ok = cb.checked === o.c; n += ok; cb.disabled = true;
+     l.classList.add(ok ? "right" : "wrong");
+     l.querySelector(".fb").textContent = (ok ? "✓ " : "✗ ") + (o.c ? "Accurate. " : "Not accurate. ") + o.fb; });
+   el.querySelector(".fbx").textContent = "Each statement earns a point when judged correctly: selected if accurate, left blank if not.";
+   finish(i, n, a.options.length, el, [...el.querySelectorAll(".opt input:checked")].map(cb => "Selected: " + a.options[cb.dataset.k].t.slice(0, 70)));
+  };
+  el.querySelector(".retry").onclick = () => { resetUI(el); draw(); };
+ },
+
+ scenario(a, el, i) {
+  const draw = () => { el.querySelector(".body").innerHTML = a.questions.map((q, qi) => `<fieldset style="border:0;padding:0;margin:${qi ? "22px" : "0"} 0 0"><legend style="font-weight:600;padding:0">${qi + 1}. ${esc(q.q)}</legend>${q.options.map((o, k) => `<label class="opt"><input type="radio" name="s${i}_${qi}" value="${k}"><span><span>${esc(o.t)}</span><div class="fb"></div></span></label>`).join("")}</fieldset>`).join(""); };
+  draw();
+  el.querySelector(".check").onclick = () => {
+   if (a.questions.some((q, qi) => !el.querySelector(`input[name=s${i}_${qi}]:checked`))) { el.querySelector(".score").textContent = "Answer every question first."; return; }
+   let n = 0;
+   a.questions.forEach((q, qi) => el.querySelectorAll(`input[name=s${i}_${qi}]`).forEach(r => {
+     const o = q.options[r.value], l = r.closest(".opt"); r.disabled = true;
+     if (r.checked) { n += o.c ? 1 : 0; l.classList.add(o.c ? "right" : "wrong"); l.querySelector(".fb").textContent = (o.c ? "✓ " : "✗ ") + o.fb; }
+     else if (o.c) { l.classList.add("right"); l.querySelector(".fb").textContent = "Best answer: " + o.fb; }
+   }));
+   finish(i, n, a.questions.length, el, a.questions.map((q, qi) => "Q" + (qi + 1) + ": " + q.options[el.querySelector(`input[name=s${i}_${qi}]:checked`).value].t.slice(0, 60)));
+  };
+  el.querySelector(".retry").onclick = () => { resetUI(el); draw(); };
+ }
+};
+
+const footerHtml = `<div class="row"><button type="button" class="check">Check answers</button><button type="button" class="ghost retry hide">Try again for practice</button><span class="score" aria-live="polite"></span></div><div class="locked"></div><div class="saved" aria-live="polite"></div>`;
+MOD.activities.forEach((a, i) => {
+  const el = document.createElement("section"); el.className = "card";
+  const pts = a.type === "sort" ? a.items.length : a.type === "match" ? a.pairs.length : a.type === "evaluate" ? a.options.length : a.questions.length;
+  el.innerHTML = `<span class="tag">Activity ${i + 1} · ${esc(a.tag)} · ${pts} points</span><h2>${esc(a.title)}</h2>${a.prompt ? `<p class="lead">${esc(a.prompt)}</p>` : ""}${a.illustrative ? `<p class="illus">${esc(a.illustrative)}</p>` : ""}${stimulus(a.stimulus)}<div class="body"></div><p class="fb fbx"></p><ul class="ifb"></ul>${footerHtml}`;
+  $("#acts").appendChild(el); R[a.type](a, el, i);
+  const btn = el.querySelector(".check"), orig = btn.onclick;
+  btn.onclick = () => { if (!$("#pname").value.trim() && state[i].earned === null) { el.querySelector(".score").textContent = "Enter your name at the top first."; $("#pname").focus(); return; } orig(); };
+});
+
+function showDone() {
+  const earned = state.reduce((s, x) => s + x.earned, 0), total = state.reduce((s, x) => s + x.total, 0), pct = Math.round(earned / total * 100);
+  const met = earned / total >= ED.mastery, name = $("#pname").value.trim(), c = code(name, modId, earned, total);
+  const when = new Date().toLocaleString();
+  const d = $("#done"); d.classList.remove("hide");
+  d.innerHTML = `<span class="tag">Check-in complete</span><div class="big">${pct}%</div>
+    <p class="lead">${earned} of ${total} points on first attempts.</p>
+    <span class="mastery">${met ? "✓ Mastery target met (80%)" : "Below the 80% mastery target"}</span>
+    ${met ? "" : `<p class="lead" style="margin-top:10px">Review the feedback in each activity and retry any activity for practice. Your first-attempt score is the one recorded.</p>`}
+    <ul>${MOD.activities.map((a, i) => `<li>Activity ${i + 1} · ${esc(a.title)}: ${state[i].earned} / ${state[i].total}</li>`).join("")}</ul>
+    <div class="saved" id="donesave" aria-live="polite"></div>
+    <label class="f" for="rcpt" style="margin-top:14px">Your completion receipt</label>
+    <textarea id="rcpt" readonly></textarea>
+    <div class="row"><button type="button" id="copy" style="background:#fff;color:#0f4c75">Copy receipt</button><span id="cmsg"></span></div>
+    <div class="next"><b>Next:</b> continue to ${esc(MOD.assignment)} below. Keep this receipt for your records.</div>`;
+  $("#rcpt").value = `MOSAIC Check-In Receipt\n${ED.course}\n${ED.editionLabel} · MosesSTEMinc L3C Professional Learning Academy\nModule: ${modId} · ${MOD.title}\nName: ${name}\nScore: ${earned}/${total} (${pct}%)\nMastery (80%): ${met ? "Met" : "Not yet"}\nCompleted: ${when}\nCode: ${c}`;
+  $("#copy").addEventListener("click", () => { const t = $("#rcpt");
+    (navigator.clipboard ? navigator.clipboard.writeText(t.value) : Promise.reject()).then(() => $("#cmsg").textContent = "Copied.").catch(() => { t.select(); $("#cmsg").textContent = "Press Ctrl/Cmd+C to copy."; }); });
+  save({ type: "complete", score: earned, possible: total, percent: pct, mastery: met ? "Met" : "Not yet", status: "Complete",
+         activities: state.map(s => s.earned + "/" + s.total).join(", "), code: c }, $("#donesave"), "✓ Completion saved to your instructor’s record.");
+  d.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+}
+})();
+</script>
+</body>
+</html>
