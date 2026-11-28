@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UDL Course Evaluation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* UDL Course Evaluation · MosesSTEMinc L3C. Same look as the MOSAIC Interactive Check-In. */
+:root{color-scheme:light dark;
+ --bg:light-dark(#eef3f7,#0c1620);--card:light-dark(#ffffff,#14222f);--ink:light-dark(#10202e,#e7eef4);
+ --muted:light-dark(#526474,#9fb1c1);--lake:light-dark(#0f4c75,#5fa8d8);--lake2:light-dark(#d9e8f3,#1b3347);
+ --acc:#e8661c;--ok:light-dark(#1d7a46,#5cd08e);--okbg:light-dark(#e3f4ea,#17321f);--no:light-dark(#b3261e,#ff8a80);--nobg:light-dark(#fbe7e5,#3a1c1a);--line:light-dark(#cfdbe5,#2a3f52);--warn:light-dark(#8a4b00,#ffc074)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Inter Tight",Inter,sans-serif;line-height:1.1;margin:0}
+h1{font-size:clamp(26px,4vw,36px);text-wrap:balance}h2{font-size:22px;margin-bottom:6px}
+a{color:var(--lake)}
+.wrap{max-width:860px;margin:0 auto;padding:clamp(16px,3vw,32px) max(4vw,14px) 32px}
+header{background:#0f4c75;color:#fff;padding:18px max(4vw,14px)}
+header .in{max-width:860px;margin:0 auto}
+.brand{font-size:14px;opacity:.92;margin-bottom:8px}
+header p{margin:6px 0 0;opacity:.92}
+.tagline{font-style:italic}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:clamp(16px,3vw,26px);margin-top:18px}
+.tag{display:inline-block;font-size:13px;font-weight:600;color:var(--lake);background:var(--lake2);padding:2px 10px;border-radius:99px;margin-bottom:8px}
+.lead{color:var(--muted);margin:4px 0 14px}
+.note{font-size:14px;color:var(--muted)}
+label.f,.qt{display:block;font-weight:600;margin:16px 0 6px}
+.req{color:var(--no);font-weight:700}
+select,input[type=text],textarea{font:16px Inter,sans-serif;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:44px}
+textarea{min-height:96px;resize:vertical}
+button{font:600 16px Inter,sans-serif;min-height:44px;padding:0 20px;border-radius:10px;border:0;cursor:pointer;background:var(--lake);color:#fff}
+button.ghost{background:transparent;color:var(--lake);border:1px solid var(--lake)}
+button:disabled{opacity:.5;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+fieldset{border:0;padding:0;margin:0}
+.q{padding:14px 0;border-bottom:1px solid var(--line)}
+.q:last-child{border-bottom:0}
+.q legend{font-weight:600;padding:0;margin-bottom:8px}
+.q legend small{display:block;font-weight:400;color:var(--muted)}
+.scale{display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,1fr));gap:6px}
+.scale label{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;border:1px solid var(--line);border-radius:10px;padding:8px 4px;min-height:56px;cursor:pointer;font-size:13px;line-height:1.2;background:var(--bg)}
+.scale label b{font-size:16px}
+.scale input{position:absolute;opacity:0;width:1px;height:1px}
+.scale label:has(input:checked){background:var(--lake);border-color:var(--lake);color:#fff}
+.scale label:has(input:focus-visible){outline:3px solid var(--acc);outline-offset:2px}
+@media(max-width:560px){.scale{grid-template-columns:1fr}.scale label{flex-direction:row;justify-content:flex-start;gap:10px;min-height:44px;padding:8px 12px;font-size:15px}}
+.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:8px}
+.checks label{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;background:var(--bg)}
+.checks input{width:20px;height:20px;accent-color:var(--lake);flex:none}
+.q.missing legend,.missing>.qt,.missing>label.f{color:var(--no)}
+.q.missing .scale label,.missing .checks label{border-color:var(--no)}
+.err{color:var(--no);font-weight:600;margin-top:12px}
+.err:empty{display:none}
+.status{margin-top:12px;font-weight:600}
+.status.ok{color:var(--ok)}.status.warn{color:var(--warn)}
+.banner{background:var(--lake2);border-radius:12px;padding:12px 14px;margin-top:18px}
+.result{background:#0f4c75;color:#fff;border:0}
+.result .lead,.result .note{color:#dce9f3}
+.result .tag{background:#fff}
+.result input[type=text]{background:#fff;color:#10202e}
+.result .status.ok{color:#bff0d2}.result .status.warn{color:#ffd9a8}
+.result button{background:#fff;color:#0f4c75}
+footer{max-width:860px;margin:0 auto;padding:0 max(4vw,14px) 40px;font-size:13px;color:var(--muted)}
+.hide{display:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <div class="brand">MosesSTEMinc L3C · Professional Learning Academy</div>
+  <h1>Course Evaluation</h1>
+  <p id="sub"></p>
+  <p class="tagline">Making Student Thinking Visible</p>
+</div></header>
+
+<main class="wrap">
+  <div class="banner hide" id="already" role="status"></div>
+
+  <form id="form" novalidate>
+    <section class="card">
+      <span class="tag">About this evaluation</span>
+      <p class="lead" style="margin-top:0">Your evaluation is <b>anonymous</b>. We do not ask for your name or email, so please don’t include your name in your answers. It takes about 10 minutes. Questions marked <span class="req">*</span> are required.</p>
+      <p class="note">Your answers help MosesSTEMinc improve this course for future educators. Results are reported only as group summaries.</p>
+    </section>
+
+    <section class="card" id="sec-about">
+      <span class="tag">Section 1</span><h2>About you</h2>
+      <div data-req="edition"><label class="f" for="edition">State edition <span class="req">*</span></label><select id="edition"></select></div>
+      <div data-req="cohort"><label class="f" for="cohort">Course cohort or session <span class="req">*</span></label><select id="cohort"></select>
+        <input type="text" id="cohortOther" class="hide" placeholder="Type your cohort or session" maxlength="80" style="margin-top:8px" aria-label="Your cohort or session"></div>
+      <div data-req="grades"><span class="qt" id="gl">Grade level(s) taught <span class="req">*</span></span><div class="checks" id="grades" role="group" aria-labelledby="gl"></div></div>
+      <div data-req="content"><label class="f" for="content">Science content area <span class="req">*</span></label><select id="content"></select></div>
+      <div data-req="role"><label class="f" for="role">Current professional role <span class="req">*</span></label><select id="role"></select></div>
+      <div data-req="years"><label class="f" for="years">Years of teaching experience <span class="req">*</span></label><select id="years"></select></div>
+    </section>
+
+    <section class="card"><span class="tag">Section 2</span><h2>Course design and content</h2>
+      <p class="lead">Rate each statement from 1 (Strongly Disagree) to 5 (Strongly Agree).</p><div id="design"></div></section>
+
+    <section class="card"><span class="tag">Section 3</span><h2>Professional learning outcomes</h2>
+      <p class="lead">As a result of completing this course, I feel confident in my ability to… (1 = Strongly Disagree, 5 = Strongly Agree). These are self-reported ratings of your own confidence.</p><div id="confidence"></div></section>
+
+    <section class="card"><span class="tag">Section 4</span><h2>Facilitator effectiveness</h2>
+      <p class="lead">The facilitator demonstrated… (1 = Strongly Disagree, 5 = Strongly Agree). Choose N/A if you didn’t interact with the facilitator in this way.</p><div id="facilitator"></div></section>
+
+    <section class="card"><span class="tag">Section 5</span><h2>Classroom implementation</h2>
+      <div id="implementation"></div>
+      <div><span class="qt" id="el">Which MOSAIC elements do you anticipate implementing? Select all that apply.</span><div class="checks" id="elements" role="group" aria-labelledby="el"></div></div>
+      <label class="f" for="strategy">Describe one instructional strategy you plan to implement.</label><textarea id="strategy" maxlength="1500"></textarea>
+      <label class="f" for="evidence">What evidence will you collect to evaluate its impact on student learning?</label><textarea id="evidence" maxlength="1500"></textarea>
+      <label class="f" for="support">What additional resources or professional support would help you?</label><textarea id="support" maxlength="1500"></textarea>
+    </section>
+
+    <section class="card"><span class="tag">Section 6</span><h2>Overall course evaluation</h2>
+      <div id="overall"></div>
+      <label class="f" for="valuable">What was the most valuable aspect of the course?</label><textarea id="valuable" maxlength="1500"></textarea>
+      <label class="f" for="improve">What improvements would you recommend?</label><textarea id="improve" maxlength="1500"></textarea>
+      <div id="recommend"></div>
+      <div class="row" style="margin-top:20px"><button type="submit" id="submit">Submit evaluation</button></div>
+      <p class="err" id="err" role="alert"></p>
+      <p class="status" id="status" aria-live="polite"></p>
+    </section>
+  </form>
+
+  <section class="card result hide" id="thanks" aria-live="polite">
+    <span class="tag">Evaluation received</span>
+    <h2>Thank you for your feedback.</h2>
+    <p class="lead">Your anonymous evaluation was saved. You can close this page or return to Canvas.</p>
+    <div id="completionBox" class="hide">
+      <h3 style="margin-top:18px">Record your evaluation completion (optional, separate)</h3>
+      <p class="lead">If your course requires completion verification, enter your name as it appears in Canvas. Your name is stored on a separate list without an evaluation response ID. This records evaluation completion only, not professional development credit.</p>
+      <label class="f" for="cname">Your name</label><input type="text" id="cname" maxlength="100" autocomplete="name">
+      <div style="margin-top:12px"><button type="button" id="csubmit">Record completion</button></div>
+      <p class="status" id="cstatus" aria-live="polite"></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p><b>MosesSTEMinc L3C</b> · Professional Learning Academy · The Science of Student Thinking™ · <span id="fed"></span> · <a href="https://www.mosesscience.net" target="_blank" rel="noopener">www.mosesscience.net</a></p>
+  <p>© 2026 MosesSTEMinc L3C. All rights reserved. Evaluation responses are anonymous and kept private; results are reported only in summary form.</p>
+</footer>
+
+<script>
+(function(){
+/* =================== SETTINGS: edit this block =================== */
+const EVAL = {
+  sheetUrl: "https://script.google.com/macros/s/AKfycbx3HYgEKeeZS3AaNL5DJPtafih7f3vtqI3Av3G0X3Ain2Idiske2VqMJVxXkRHZSS3M/exec",                 // paste the EVALUATION web app URL here (ends in /exec). Not the check-in URL.
+  key: "UDL-EVAL-2027",      // must match KEY in the evaluation Apps Script
+  editions: {                   // add a new state edition by copying one block
+    wyoming_udl: { label: "Wyoming UDL Edition",
+                course: "UDL in Practice: Removing Barriers in Science Instruction",
+                cohorts: ["March 2027 (Mar 2–23, 2027)"],
+                completionLog: true }
+  }
+};
+/* ================================================================== */
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const AGREE = ["Strongly Disagree","Disagree","Neutral","Agree","Strongly Agree"];
+const DESIGN = ["The course objectives were clearly communicated.",
+  "The instructional content was relevant to my professional responsibilities.",
+  "The learning activities supported my understanding of the MOSAIC Framework™.",
+  "The scientific phenomenon supported my understanding of phenomenon-based science instruction.",
+  "The interactive check-ins helped me evaluate my understanding.",
+  "The application assignments supported the transfer of learning to my instructional practice.",
+  "The course materials supported alignment with my state science standards.",
+  "The course organization and navigation supported my learning."];
+const ELEMENTS = [["Modeling","Using scientific models to make student thinking visible."],
+  ["Observation","Examining student thinking and identifying learning needs."],
+  ["Scaffolding","Providing instructional supports without reducing cognitive demand."],
+  ["Assessment","Evaluating student reasoning and providing feedback that supports model revision."],
+  ["Inquiry","Designing learning experiences that engage students in scientific investigations."],
+  ["Collaboration","Facilitating scientific discourse and collaborative sensemaking."]];
+const UDL_DESIGN = DESIGN.map((t,i) => ({
+  2: "The learning activities supported my understanding of Universal Design for Learning.",
+  3: "The science classroom examples supported my understanding of instructional barriers.",
+  4: "The formative scenario activities helped me evaluate my understanding."
+}[i] || t));
+const UDL_OUTCOMES = [
+  ["Identifying barriers", "Identify at least two instructional barriers that limit participation in science."],
+  ["Selecting scaffolds", "Select instructional supports that address barriers while maintaining science learning goals."],
+  ["Designing flexible pathways", "Design multiple options for engagement and communicating scientific understanding."],
+  ["Revising a lesson", "Revise a science lesson using UDL supports, formative assessment and evidence of learning."]
+];
+const UDL_ELEMENTS = ["Engagement", "Representation", "Action and Expression"];
+const isUDL = () => $("#edition").value === "wyoming_udl";
+const activeDesign = () => isUDL() ? UDL_DESIGN : DESIGN;
+const activeOutcomes = () => isUDL() ? UDL_OUTCOMES : ELEMENTS;
+const FACIL = ["Knowledge of science instruction","Communication of instructional expectations","Quality of guidance and feedback","Support for an inclusive professional learning environment"];
+const opts = (id, list, ph) => { $(id).innerHTML = `<option value="">${esc(ph || "Choose one")}</option>` + list.map(v => `<option>${esc(v)}</option>`).join(""); };
+
+/* ---------- edition + cohort ---------- */
+const params = new URLSearchParams(location.search);
+const edKeys = Object.keys(EVAL.editions);
+$("#edition").innerHTML = `<option value="">Choose your state edition</option>` + edKeys.map(k => `<option value="${esc(k)}">${esc(EVAL.editions[k].label)}</option>`).join("");
+function setEdition(k) {
+  const ed = EVAL.editions[k];
+  $("#sub").textContent = ed ? ed.course + " · " + ed.label : "UDL in Practice";
+  $("#fed").textContent = ed ? ed.label : "";
+  const list = ed ? ed.cohorts : [];
+  $("#cohort").innerHTML = `<option value="">Choose your cohort</option>` + list.map(v => `<option>${esc(v)}</option>`).join("") + `<option value="__other">Other (type it in)</option>`;
+  if (list.length === 1) $("#cohort").value = list[0];
+  $("#cohortOther").classList.add("hide");
+  renderEditionQuestions();
+  checkAlready();
+}
+const startEd = params.get("ed") || "wyoming_udl";
+if (EVAL.editions[startEd]) $("#edition").value = startEd;
+$("#edition").addEventListener("change", () => setEdition($("#edition").value));
+$("#cohort").addEventListener("change", () => { $("#cohortOther").classList.toggle("hide", $("#cohort").value !== "__other"); checkAlready(); });
+const cohortValue = () => $("#cohort").value === "__other" ? $("#cohortOther").value.trim() : $("#cohort").value;
+
+/* ---------- build questions ---------- */
+$("#grades").innerHTML = ["K–5","6–8","9–12","Postsecondary","Other"].map(g => `<label><input type="checkbox" value="${esc(g)}"> ${esc(g)}</label>`).join("");
+opts("#content", ["General science","Life science / Biology","Chemistry","Physics / Physical science","Earth and space science","Environmental science","Integrated STEM","Other"]);
+opts("#role", ["Classroom teacher","Instructional coach","Department chair or teacher leader","Mentor teacher","School or district administrator","Curriculum specialist","Pre-service teacher","Other"]);
+opts("#years", ["0–2","3–5","6–10","11–20","21 or more"]);
+
+
+function scaleQ(name, text, sub, labels, extra) {
+  const all = labels.map((l, i) => [String(i + 1), l, i + 1]).concat(extra ? [["N/A", "Not applicable", "N/A"]] : []);
+  return `<fieldset class="q" data-q="${name}"><legend>${esc(text)} <span class="req">*</span>${sub ? `<small>${esc(sub)}</small>` : ""}</legend>
+    <div class="scale" style="--n:${all.length}">${all.map(a => `<label><input type="radio" name="${name}" value="${esc(a[0])}"><b>${esc(String(a[2]))}</b><span>${esc(a[1])}</span></label>`).join("")}</div></fieldset>`;
+}
+function renderEditionQuestions() {
+  $("#design").innerHTML = activeDesign().map((t, i) => scaleQ("d" + i, (i + 1) + ". " + t, "", AGREE)).join("");
+  $("#confidence").innerHTML = activeOutcomes().map((e, i) => scaleQ("c" + i, e[0], e[1], AGREE)).join("");
+  $("#elements").innerHTML = (isUDL() ? UDL_ELEMENTS : ELEMENTS.map(e => e[0])).map(e => `<label><input type="checkbox" value="${esc(e)}"> ${esc(e)}</label>`).join("");
+  $("#el").textContent = isUDL() ? "Which UDL principles do you anticipate implementing? Select all that apply." : "Which MOSAIC elements do you anticipate implementing? Select all that apply.";
+  $("#implementation").innerHTML = scaleQ("impl", isUDL() ? "How likely are you to implement strategies from Universal Design for Learning?" : "How likely are you to implement strategies from the MOSAIC Framework™?", "", ["Very unlikely","Unlikely","Not sure","Likely","Very likely"]);
+  $(".brand").textContent = isUDL() ? "MosesSTEMinc L3C · Professional Learning Academy" : "MosesSTEMinc L3C · Professional Learning Academy · MOSAIC Framework™";
+}
+$("#facilitator").innerHTML = FACIL.map((t, i) => scaleQ("f" + i, t, "", AGREE, true)).join("");
+
+$("#overall").innerHTML = scaleQ("overall", "Rate your overall professional learning experience.", "", ["Poor","Fair","Good","Very Good","Excellent"]);
+$("#recommend").innerHTML = `<fieldset class="q" data-q="rec" style="border-bottom:0"><legend>Would you recommend this course to another educator? <span class="req">*</span></legend>
+  <div class="scale" style="--n:3">${["Yes","No","Not sure"].map(v => `<label><input type="radio" name="rec" value="${v}"><b>${v}</b></label>`).join("")}</div></fieldset>`;
+setEdition($("#edition").value);
+
+/* ---------- duplicate guard (this browser only) ---------- */
+const flagKey = () => "udlEval:" + $("#edition").value + ":" + cohortValue();
+function checkAlready() {
+  let when = null; try { when = localStorage.getItem(flagKey()); } catch (e) {}
+  const b = $("#already");
+  if (when && $("#edition").value) {
+    b.innerHTML = `This browser already submitted an evaluation for this course on ${esc(when)}. You don’t need to submit again. If you are a different participant using this device, you may continue.`;
+    b.classList.remove("hide");
+  } else b.classList.add("hide");
+}
+
+/* ---------- saving with server confirmation ---------- */
+function newId() { const a = new Uint8Array(12); (window.crypto || window.msCrypto).getRandomValues(a); return Array.from(a, x => x.toString(16).padStart(2, "0")).join(""); }
+function postPayload(obj) {
+  const name = "evsink" + Math.random().toString(36).slice(2, 8);
+  const fr = document.createElement("iframe"); fr.name = name; fr.style.display = "none"; fr.title = "submission"; document.body.appendChild(fr);
+  const f = document.createElement("form"); f.method = "POST"; f.action = EVAL.sheetUrl; f.target = name; f.style.display = "none";
+  const inp = document.createElement("input"); inp.type = "hidden"; inp.name = "payload"; inp.value = JSON.stringify(obj);
+  f.appendChild(inp); document.body.appendChild(f); f.submit(); f.remove();
+  setTimeout(() => fr.remove(), 60000);
+}
+let cbSeq = 0;
+function status(id, kind) {
+  return new Promise((resolve) => {
+    const cb = "mosaicEv" + Date.now().toString(36) + (cbSeq++);
+    const s = document.createElement("script");
+    const done = v => { clearTimeout(t); window[cb] = function(){}; s.remove(); resolve(v); };
+    const t = setTimeout(() => done(false), 10000);
+    window[cb] = r => done(!!(r && r.saved));
+    s.onerror = () => done(false);
+    s.src = EVAL.sheetUrl + "?" + new URLSearchParams({ action: "status", kind, id, callback: cb });
+    document.head.appendChild(s);
+  });
+}
+async function sendAndConfirm(obj, kind, setStatus) {
+  if (!EVAL.sheetUrl) { setStatus("warn", "This form is not connected to a results sheet yet. Please let your instructor know."); return false; }
+  for (let round = 0; round < 2; round++) {
+    setStatus("", round ? "Still saving… trying again." : "Saving your response…");
+    postPayload(obj);
+    for (let i = 0; i < 6; i++) {
+      await new Promise(r => setTimeout(r, i ? 2500 : 2000));
+      if (await status(obj.id, kind)) return true;
+    }
+  }
+  return false;
+}
+
+/* ---------- collect + validate ---------- */
+const radio = n => { const r = document.querySelector(`input[name="${n}"]:checked`); return r ? r.value : ""; };
+const checked = id => [...document.querySelectorAll(`${id} input:checked`)].map(x => x.value);
+function collect() {
+  document.querySelectorAll(".missing").forEach(x => x.classList.remove("missing"));
+  const miss = [];
+  const need = (ok, el) => { if (!ok) { miss.push(el); el.classList.add("missing"); } };
+  need($("#edition").value, $('[data-req="edition"]'));
+  need(cohortValue(), $('[data-req="cohort"]'));
+  need(checked("#grades").length, $('[data-req="grades"]'));
+  ["content","role","years"].forEach(k => need($("#" + k).value, $(`[data-req="${k}"]`)));
+  const qs = [...activeDesign().map((_, i) => "d" + i), ...activeOutcomes().map((_, i) => "c" + i), ...FACIL.map((_, i) => "f" + i), "impl", "overall", "rec"];
+  qs.forEach(n => need(radio(n), document.querySelector(`[data-q="${n}"]`)));
+  if (miss.length) return { miss };
+  const num = n => Number(radio(n));
+  return { data: {
+    key: EVAL.key, type: "evaluation", id: newId(),
+    edition: EVAL.editions[$("#edition").value].label, cohort: cohortValue(),
+    grades: checked("#grades").join(", "), content: $("#content").value, role: $("#role").value, years: $("#years").value,
+    design: activeDesign().map((_, i) => num("d" + i)), confidence: activeOutcomes().map((_, i) => num("c" + i)),
+    facilitator: FACIL.map((_, i) => radio("f" + i) === "N/A" ? "N/A" : num("f" + i)),
+    implementation: num("impl"), elements: checked("#elements"),
+    strategy: $("#strategy").value.trim(), evidence: $("#evidence").value.trim(), support: $("#support").value.trim(),
+    overall: num("overall"), valuable: $("#valuable").value.trim(), improve: $("#improve").value.trim(), recommend: radio("rec") } };
+}
+
+// Clear the red highlight as soon as a question is answered
+$("#form").addEventListener("change", e => { const m = e.target.closest(".missing"); if (m) m.classList.remove("missing"); });
+
+let pending = null;
+const setS = (el) => (cls, msg) => { el.className = "status " + cls; el.textContent = msg; };
+$("#form").addEventListener("submit", async e => {
+  e.preventDefault();
+  $("#err").textContent = "";
+  const c = collect();
+  if (c.miss) { $("#err").textContent = `Please answer the ${c.miss.length} highlighted question${c.miss.length > 1 ? "s" : ""}.`; c.miss[0].scrollIntoView({ block: "center" }); const f = c.miss[0].querySelector("input,select"); if (f) f.focus({ preventScroll: true }); return; }
+  if (pending) c.data.id = pending.id;   // a retry reuses the same ID, so it can never create a second row
+  pending = c.data;
+  $("#submit").disabled = true;
+  const ok = await sendAndConfirm(pending, "evaluation", setS($("#status")));
+  if (ok) {
+    try { localStorage.setItem(flagKey(), new Date().toLocaleDateString()); } catch (e2) {}
+    $("#form").classList.add("hide"); $("#already").classList.add("hide");
+    const ed = EVAL.editions[$("#edition").value];
+    $("#completionBox").classList.toggle("hide", !(ed && ed.completionLog));
+    $("#thanks").classList.remove("hide"); $("#thanks").scrollIntoView({ block: "start" });
+  } else {
+    setS($("#status"))("warn", "We couldn’t confirm your evaluation was saved. Your answers are still here. Click Submit evaluation to try again.");
+    $("#submit").disabled = false;
+  }
+});
+
+let cPending = null;
+$("#csubmit").addEventListener("click", async () => {
+  const name = $("#cname").value.trim(), st = setS($("#cstatus"));
+  if (!name) { st("warn", "Enter your name first."); $("#cname").focus(); return; }
+  if (!cPending || cPending.name !== name) cPending = { key: EVAL.key, type: "completion", id: newId(), name, edition: EVAL.editions[$("#edition").value].label, cohort: cohortValue() };
+  $("#csubmit").disabled = true;
+  const ok = await sendAndConfirm(cPending, "completion", st);
+  if (ok) { st("ok", "✓ Completion recorded."); $("#cname").readOnly = true; }
+  else { st("warn", "We couldn’t confirm it was recorded. Click Record completion to try again."); $("#csubmit").disabled = false; }
+});
+})();
+</script>
+</body>
+</html>
